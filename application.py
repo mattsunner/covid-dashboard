@@ -2,6 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.express as px
+import plotly.graph_objs as go
 import pandas as pd
 import sqlite3
 
@@ -13,18 +14,27 @@ federal_df = pd.read_sql("SELECT * FROM federaldata", conn)
 state_df = pd.read_sql("SELECT * FROM statedata", conn)
 
 # Federal Level Analysis
-fig_1 = px.scatter(x=federal_df['date'], y=federal_df['positive'], title='Running Total of Positive Cases in the United States (U.S.) by Date', labels={
+fig_1 = px.scatter(x=federal_df['date'], y=federal_df['positive'],
+                   title='Running Total of Positive Cases in the United States (U.S.) by Date',
+                   labels={
                    'x': 'Date', 'y': 'Number of Positive Cases (M)'})
 
-fig_2 = px.scatter(x=federal_df['date'], y=federal_df['totalTestResultsIncrease'], title='Total Increase in Daily Testing for COVID-19 (U.S.)',
+fig_2 = px.scatter(x=federal_df['date'], y=federal_df['totalTestResultsIncrease'],
+                   title='Total Increase in Daily Testing for COVID-19 (U.S.)',
                    labels={'x': 'Date', 'y': 'Number of Tests Completed'})
 
 fig_3 = px.line(federal_df, x='date', y=['death', 'totalTestResultsIncrease', 'positive'],
                 title="COVID-19 Deaths Compared to Tests Administered - Baseline Values (Single-Axis)")
 
 # State Level Analysis
-fig_4 = px.scatter(x=state_df['date'], y=state_df['positive'], color=state_df['state'], title='Overall Positive Cases by State in the United States (U.S.) by Date',
+fig_4 = px.scatter(x=state_df['date'], y=state_df['positive'], color=state_df['state'],
+                   title='Overall Positive Cases by State in the United States (U.S.) by Date',
                    labels={'x': 'Date', 'y': 'Number of Positive Cases (M)'})
+
+fig_5 = go.Choropleth(locations = state_df['state'], locationmode = 'USA-states',
+                      z = state_df['positive'],
+                      marker_line_color = 'black', marker_line_width = 0.5,)
+
 
 app.layout = html.Div(children=[
     html.H1(children="COVID-19 Case Analysis"),
@@ -47,6 +57,11 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='fig_4',
         figure=fig_4
+    ),
+
+    dcc.Graph(
+        id='fig_5',
+        figure=fig_5
     ),
 ])
 
